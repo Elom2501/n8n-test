@@ -1,0 +1,219 @@
+{
+  "name": "Telegram bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        -64
+      ],
+      "id": "9b8c621d-7e71-47c3-8edb-952cf8f9c495",
+      "name": "Telegram Trigger",
+      "webhookId": "f658cd8b-2455-479a-b10c-f43230fad011",
+      "credentials": {
+        "telegramApi": {
+          "id": "JKxXstmkmAj6BeC1",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant for coding\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        -32
+      ],
+      "id": "cafc3a2e-835c-4816-9248-d5919905d5d9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:31b-cloud",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        176,
+        208
+      ],
+      "id": "ddf971af-8bd4-4f67-875b-c882cdcda38a",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "kq5Rf1JJJx1cfrQZ",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        16
+      ],
+      "id": "e7d4adb5-1d0c-403f-8874-fe7e0ceed8d4",
+      "name": "Send a text message",
+      "webhookId": "57260fd3-954b-46b5-92a3-bce2a91eb5c7",
+      "credentials": {
+        "telegramApi": {
+          "id": "JKxXstmkmAj6BeC1",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b6e243fe-7465-4cdf-b2f3-762287eaedd1",
+              "leftValue": "={{ $json.message.chat.id }}",
+              "rightValue": 7396751131,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        -32
+      ],
+      "id": "883dd4b6-3980-4247-8c2d-578eb5b18c66",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=No",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        144
+      ],
+      "id": "62323755-6427-4333-8f7d-e714275a20c4",
+      "name": "Send a text message2",
+      "webhookId": "57260fd3-954b-46b5-92a3-bce2a91eb5c7",
+      "credentials": {
+        "telegramApi": {
+          "id": "JKxXstmkmAj6BeC1",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c073fc54-7594-44d5-a764-ecbeecb24dd3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eeee97433f9d4d3501cffe2e6798fddf03c33d7b670ddf376567438556dcde9b"
+  },
+  "id": "kxuFqbYc1TxjLfiN",
+  "tags": []
+}
